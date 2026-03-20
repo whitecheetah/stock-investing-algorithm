@@ -11,15 +11,13 @@ import {
   removeFromWatchlist,
   getGetPortfolioQueryKey,
   getGetWatchlistQueryKey,
-  getGetRecommendationsQueryKey
+  getGetRecommendationsQueryKey,
+  type AnalyzeRequest,
+  type AddPositionRequest,
+  type UpdatePositionRequest,
+  type AddWatchlistRequest,
+  type ErrorResponse
 } from "@workspace/api-client-react";
-import type { 
-  AnalyzeRequest, 
-  AddPositionRequest, 
-  UpdatePositionRequest, 
-  AddWatchlistRequest,
-  ErrorResponse
-} from "@workspace/api-client-react/src/generated/api.schemas";
 
 // Re-export generated queries for convenience
 export { useGetPortfolio, useGetRecommendations, useGetWatchlist };

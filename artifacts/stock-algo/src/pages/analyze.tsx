@@ -7,7 +7,7 @@ import { Search, Loader2, ArrowRight, Save, Eye, TrendingUp, AlertOctagon } from
 import { motion, AnimatePresence } from "framer-motion";
 import { ScoreRing } from "@/components/ui/ScoreRing";
 import { TierBadge, SignalBadge, ValueBadge } from "@/components/ui/Badges";
-import { formatCurrency, formatNumber, formatPercent } from "@/lib/utils";
+import { cn, formatCurrency, formatNumber, formatPercent } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
