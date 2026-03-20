@@ -1,0 +1,17 @@
+packages:
+  "recharts": "For portfolio performance and financial metric charts"
+  "framer-motion": "For smooth dashboard animations and micro-interactions"
+  "date-fns": "For human-readable date formatting in portfolio and analysis views"
+  "react-hook-form": "For robust form state management in analyze and portfolio views"
+  "@hookform/resolvers": "For Zod validation integration with forms"
+  "clsx": "For conditional class name joining"
+  "tailwind-merge": "For merging Tailwind classes without conflicts"
+
+images:
+  - path: "artifacts/stock-algo/public/images/fin-bg.png"
+    description: "Deep dark midnight blue gradient mesh background with very subtle cyan and emerald abstract light trails, professional financial terminal aesthetic, 4k resolution, very minimal"
+    aspect_ratio: "16:9"
+
+notes:
+  - Using generated hooks from @workspace/api-client-react
+  - Defaulting to a forced dark-mode aesthetic for the professional financial dashboard look

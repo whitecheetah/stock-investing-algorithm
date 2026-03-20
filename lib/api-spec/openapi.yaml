@@ -1,0 +1,594 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Stock Investing Algorithm API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: analyze
+    description: Stock analysis
+  - name: recommendations
+    description: Stock recommendations
+  - name: portfolio
+    description: Portfolio management
+  - name: watchlist
+    description: Watchlist management
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /analyze:
+    post:
+      operationId: analyzeStock
+      tags: [analyze]
+      summary: Analyze a stock using the 5-phase algorithm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeRequest"
+      responses:
+        "200":
+          description: Analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockAnalysis"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: API rate limit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /recommendations:
+    get:
+      operationId: getRecommendations
+      tags: [recommendations]
+      summary: Get top stock recommendations from analyzed history
+      parameters:
+        - name: tier
+          in: query
+          schema:
+            type: string
+            enum: [A+, A, B, C]
+        - name: signal
+          in: query
+          schema:
+            type: string
+            enum: [Strong Buy, Buy, Hold, Wait]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: List of recommendations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationsResponse"
+
+  /portfolio:
+    get:
+      operationId: getPortfolio
+      tags: [portfolio]
+      summary: Get current portfolio positions
+      responses:
+        "200":
+          description: Portfolio positions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortfolioResponse"
+    post:
+      operationId: addPosition
+      tags: [portfolio]
+      summary: Add a position to portfolio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddPositionRequest"
+      responses:
+        "201":
+          description: Position added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortfolioPosition"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /portfolio/{id}:
+    patch:
+      operationId: updatePosition
+      tags: [portfolio]
+      summary: Update a portfolio position (mark sold, update price)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePositionRequest"
+      responses:
+        "200":
+          description: Position updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortfolioPosition"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deletePosition
+      tags: [portfolio]
+      summary: Delete a portfolio position
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Position deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /watchlist:
+    get:
+      operationId: getWatchlist
+      tags: [watchlist]
+      summary: Get watchlist
+      responses:
+        "200":
+          description: Watchlist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WatchlistResponse"
+    post:
+      operationId: addToWatchlist
+      tags: [watchlist]
+      summary: Add ticker to watchlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddWatchlistRequest"
+      responses:
+        "201":
+          description: Added to watchlist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WatchlistItem"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /watchlist/{id}:
+    delete:
+      operationId: removeFromWatchlist
+      tags: [watchlist]
+      summary: Remove from watchlist
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required: [error]
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success]
+
+    AnalyzeRequest:
+      type: object
+      properties:
+        ticker:
+          type: string
+          description: Stock ticker symbol (e.g. AAPL)
+      required: [ticker]
+
+    FundamentalScore:
+      type: object
+      properties:
+        peRatio:
+          type: number
+          nullable: true
+        pbRatio:
+          type: number
+          nullable: true
+        debtToEquity:
+          type: number
+          nullable: true
+        currentRatio:
+          type: number
+          nullable: true
+        revenueGrowth:
+          type: number
+          nullable: true
+        epsGrowth:
+          type: number
+          nullable: true
+        profitMargin:
+          type: number
+          nullable: true
+        roe:
+          type: number
+          nullable: true
+        dividendYield:
+          type: number
+          nullable: true
+        score:
+          type: number
+          description: 0-100 fundamental score
+      required: [score]
+
+    TechnicalScore:
+      type: object
+      properties:
+        rsi:
+          type: number
+          nullable: true
+        macdSignal:
+          type: string
+          nullable: true
+        sma50Above200:
+          type: boolean
+          nullable: true
+        volumeTrend:
+          type: string
+          nullable: true
+        priceVs52WeekHigh:
+          type: number
+          nullable: true
+        score:
+          type: number
+          description: 0-5 technical score
+      required: [score]
+
+    StockAnalysis:
+      type: object
+      properties:
+        ticker:
+          type: string
+        companyName:
+          type: string
+          nullable: true
+        currentPrice:
+          type: number
+          nullable: true
+        overallScore:
+          type: number
+          description: 0-100 overall score (70% fundamental + 30% technical)
+        tier:
+          type: string
+          enum: [A+, A, B, C]
+          description: Tier classification
+        entrySignal:
+          type: string
+          enum: [Strong Buy, Buy, Hold, Wait]
+        stopLoss:
+          type: number
+          nullable: true
+          description: Automatic 8% stop-loss price
+        target1:
+          type: number
+          nullable: true
+          description: 20% profit target
+        target2:
+          type: number
+          nullable: true
+          description: 35% profit target
+        target3:
+          type: number
+          nullable: true
+          description: 50% profit target
+        fundamental:
+          $ref: "#/components/schemas/FundamentalScore"
+        technical:
+          $ref: "#/components/schemas/TechnicalScore"
+        analyzedAt:
+          type: string
+          format: date-time
+        sector:
+          type: string
+          nullable: true
+        marketCap:
+          type: number
+          nullable: true
+      required: [ticker, overallScore, tier, entrySignal, fundamental, technical, analyzedAt]
+
+    RecommendationsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/StockAnalysis"
+        total:
+          type: integer
+      required: [items, total]
+
+    AddPositionRequest:
+      type: object
+      properties:
+        ticker:
+          type: string
+        companyName:
+          type: string
+          nullable: true
+        shares:
+          type: number
+        entryPrice:
+          type: number
+        tier:
+          type: string
+          nullable: true
+        entrySignal:
+          type: string
+          nullable: true
+        stopLoss:
+          type: number
+          nullable: true
+        target1:
+          type: number
+          nullable: true
+        target2:
+          type: number
+          nullable: true
+        target3:
+          type: number
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+      required: [ticker, shares, entryPrice]
+
+    UpdatePositionRequest:
+      type: object
+      properties:
+        currentPrice:
+          type: number
+          nullable: true
+        shares:
+          type: number
+          nullable: true
+        status:
+          type: string
+          enum: [open, closed]
+          nullable: true
+        exitPrice:
+          type: number
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+
+    PortfolioPosition:
+      type: object
+      properties:
+        id:
+          type: integer
+        ticker:
+          type: string
+        companyName:
+          type: string
+          nullable: true
+        shares:
+          type: number
+        entryPrice:
+          type: number
+        currentPrice:
+          type: number
+          nullable: true
+        status:
+          type: string
+          enum: [open, closed]
+        exitPrice:
+          type: number
+          nullable: true
+        tier:
+          type: string
+          nullable: true
+        entrySignal:
+          type: string
+          nullable: true
+        stopLoss:
+          type: number
+          nullable: true
+        target1:
+          type: number
+          nullable: true
+        target2:
+          type: number
+          nullable: true
+        target3:
+          type: number
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        openedAt:
+          type: string
+          format: date-time
+        closedAt:
+          type: string
+          format: date-time
+          nullable: true
+        unrealizedPnl:
+          type: number
+          nullable: true
+        unrealizedPnlPct:
+          type: number
+          nullable: true
+        realizedPnl:
+          type: number
+          nullable: true
+      required: [id, ticker, shares, entryPrice, status, openedAt]
+
+    PortfolioResponse:
+      type: object
+      properties:
+        positions:
+          type: array
+          items:
+            $ref: "#/components/schemas/PortfolioPosition"
+        summary:
+          $ref: "#/components/schemas/PortfolioSummary"
+      required: [positions, summary]
+
+    PortfolioSummary:
+      type: object
+      properties:
+        totalValue:
+          type: number
+        totalCost:
+          type: number
+        totalUnrealizedPnl:
+          type: number
+        totalUnrealizedPnlPct:
+          type: number
+        totalRealizedPnl:
+          type: number
+        openPositions:
+          type: integer
+        closedPositions:
+          type: integer
+        winRate:
+          type: number
+          nullable: true
+      required: [totalValue, totalCost, totalUnrealizedPnl, totalUnrealizedPnlPct, totalRealizedPnl, openPositions, closedPositions]
+
+    AddWatchlistRequest:
+      type: object
+      properties:
+        ticker:
+          type: string
+        companyName:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        alertPrice:
+          type: number
+          nullable: true
+      required: [ticker]
+
+    WatchlistItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        ticker:
+          type: string
+        companyName:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        alertPrice:
+          type: number
+          nullable: true
+        addedAt:
+          type: string
+          format: date-time
+        lastAnalysis:
+          $ref: "#/components/schemas/StockAnalysis"
+          nullable: true
+      required: [id, ticker, addedAt]
+
+    WatchlistResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/WatchlistItem"
+        total:
+          type: integer
+      required: [items, total]
