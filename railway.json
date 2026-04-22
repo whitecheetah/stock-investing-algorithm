@@ -1,6 +1,6 @@
 {
   "deploy": {
-    "startCommand": "node artifacts/api-server/dist/index.cjs",
+    "startCommand": "pnpm --filter @workspace/db run push-force && node artifacts/api-server/dist/index.cjs",
     "healthcheckPath": "/api/healthz",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3

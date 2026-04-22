@@ -15,4 +15,4 @@ cmds = [
 ]
 
 [start]
-cmd = "node artifacts/api-server/dist/index.cjs"
+cmd = "pnpm --filter @workspace/db run push-force && node artifacts/api-server/dist/index.cjs"
