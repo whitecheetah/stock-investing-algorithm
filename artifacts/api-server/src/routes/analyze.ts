@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { stockAnalysesTable } from "@workspace/db/schema";
-import { getCompanyOverview, getQuote, getTechnicals } from "../lib/alphaVantage.js";
+import { getCompanyOverview, getQuote, getTechnicals } from "../lib/marketData.js";
 import { runAlgorithm } from "../lib/algorithm.js";
 import { desc, eq } from "drizzle-orm";
 

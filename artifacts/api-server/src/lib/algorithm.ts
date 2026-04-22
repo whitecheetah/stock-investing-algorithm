@@ -1,4 +1,4 @@
-import type { CompanyOverview, QuoteData, TechnicalData } from "./alphaVantage.js";
+import type { CompanyOverview, QuoteData, TechnicalData } from "./marketData.js";
 
 export interface AlgorithmResult {
   ticker: string;
