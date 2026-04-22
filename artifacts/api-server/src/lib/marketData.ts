@@ -1,4 +1,4 @@
-import YahooFinance from "yahoo-finance2";
+import YahooFinanceImport from "yahoo-finance2";
 import { logger } from "./logger.js";
 
 // yahoo-finance2's package "exports" map is missing a "types" condition under
@@ -16,7 +16,12 @@ type YFClient = {
   ) => Promise<{ quotes?: Array<{ date: Date; close: number | null; volume: number | null }> }>;
 };
 
-const YahooCtor = YahooFinance as unknown as new () => YFClient;
+// CJS/ESM interop: under tsx (dev) the default import resolves to the class,
+// but when esbuild bundles to CJS the require() returns the namespace object
+// with the class on `.default`. Handle both shapes.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const YahooFinanceAny = YahooFinanceImport as any;
+const YahooCtor = (YahooFinanceAny?.default ?? YahooFinanceAny) as new () => YFClient;
 const yahooFinance: YFClient = new YahooCtor();
 
 export interface CompanyOverview {
